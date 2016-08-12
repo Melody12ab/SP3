@@ -122,7 +122,7 @@
                 <c:if test="${!empty error}">
                     <h4 class="errorinfo" ><c:out value="${error}"/></h4>
                 </c:if>
-                <form action="<c:url value="/admin/loginCheck.lenovo"/>" method="post">
+                <form action="<c:url value="/admin/loginCheck.melody"/>" method="post">
                     <div class="form-group">
                         <div class="col-xs-12  ">
                             <div class="input-group">

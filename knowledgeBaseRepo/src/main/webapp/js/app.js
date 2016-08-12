@@ -1,5 +1,5 @@
 /**
- * Created by xiaobai on 16-2-19.
+ * updated by xiaobai on 16-8-02.
  */
 var editors = new Object();
 $(document).ready(function () {
@@ -10,21 +10,22 @@ $(document).ready(function () {
 //采集事件绑定
 $("#collection").click(function () {
     console.log("数据采集");
-    var url = $("#inputURL").val().trim();
+    var inputUrl=$("#inputURL");
+    var url = inputUrl.val().trim();
     if (url === "") {
-        $("#inputURL").attr("placeholder", "URL不能为空！！！");
-        $("#inputURL").parent().addClass("has-error");
+        inputUrl.attr("placeholder", "URL不能为空！！！");
+        inputUrl.parent().addClass("has-error");
         return;
     }
     var titleName = $(".labelList .active").attr("title") ? $(".labelList .active").attr("title") : "untitle";
     $.ajax({
         type: "get",
         dataType: "json",
-        url: "getArticle.lenovo",
+        url: "getArticle.melody",
         data: "url=" + url,
         success: function (data) {
             if (data["code"] === 200) {
-                UE.getEditor(titleName).setContent(data["content"]);
+                editors[titleName].setContent(data["content"]);
                 if ($("#inputTitle").val().trim() === "") {
                     $("#inputTitle").val(data["title"]);
                 }
@@ -38,7 +39,7 @@ var delTag = "&nbsp;&nbsp;<span class='glyphicon glyphicon-remove deleteTag' ari
 $("#addLabel").click(function () {
     console.log("添加标签");
     var labelName = $("#inputLabel").val().trim();
-    var labelReal = labelName.replace(/[\.]*[\\]*[\/]*/g, "");
+    var labelReal = labelName;
 
     if (labelName === "") {
         $("#inputLabel").attr("placeholder", "标签名不能为空！！！");
@@ -80,7 +81,7 @@ $("#addLabel").click(function () {
 //删除标签
 $(".labelList").on("click", "span", function () {
     console.log("删除标签");
-    deleteTitle = $(this).parent().text().trim().replace(/[\.]*[\\]*[\/]*/g, "");
+    deleteTitle = $(this).parent().text().trim();
     //console.log(deleteTitle);
     var chang = $(".labelList li").length;
     if (deleteTitle === "untitle" || chang < 1) {
@@ -114,7 +115,7 @@ $(".labelList").on("click", "a", function (event) {
             $(".labelList .active").removeClass("active");
             pa.attr("class", "active");
             $(".wysiwyg").hide();
-            var titleName = pa.attr("title").replace(/[\.]*[\\]*[\/]*/g, "");
+            var titleName = pa.attr("title");
             $(".richEdit > [title='" + titleName + "']").show();
         }
     }, 300);
@@ -168,7 +169,7 @@ $(".preview").click(function () {
         articleInfo.content[++i] = editors["untitle"].getContent();
     } else {
         $(".labelList > li").each(function () {
-            articleInfo.content[i] = $(this).text().trim().replace(/[\.]*[\\]*[\/]*/g, "");
+            articleInfo.content[i] = $(this).text().trim();
             var key = articleInfo.content[i];
             articleInfo.content[++i] = editors[key].getContent();
             i++;
@@ -178,7 +179,7 @@ $(".preview").click(function () {
     //localstorage存起来  然后请求展示
     localStorage.clear();
     localStorage.setItem("articleInfo", JSON.stringify(articleInfo));
-    window.open("preview.lenovo");
+    window.open("preview.melody");
 });
 //提交表单 保存数据
 $(".zubmit").click(function () {
@@ -202,7 +203,7 @@ $(".zubmit").click(function () {
         }
     } else {
         $(".labelList > li").each(function () {
-            articleInfo.content[i] = $(this).text().trim().replace(/[\.]*[\\]*[\/]*/g, "");
+            articleInfo.content[i] = $(this).text().trim();
             var key = articleInfo.content[i];
             articleInfo.content[++i] = editors[key].getContent();
             if (articleInfo.content[i].indexOf("rar") > -1) {
@@ -215,9 +216,9 @@ $(".zubmit").click(function () {
     $.ajax({
         type: "post",
         dataType: "json",
-        url: "save.lenovo",
-        contentType:"application/json",
-        data:JSON.stringify(articleInfo),
+        url: "save.melody",
+        contentType: "application/json",
+        data: JSON.stringify(articleInfo),
         success: function (data) {
             if (data["code"] === 200) {
                 if (hasAppendix) {
@@ -226,12 +227,13 @@ $(".zubmit").click(function () {
                     msg = "保存成功";
                 }
                 alert(msg);
+            } else {
+                alert("保存失败");
             }
         }
     });
 });
 
-//todo
 //打开文件
 $(".openFile").click(function () {
     console.log("打开文件");
@@ -241,7 +243,17 @@ $(".openFile").click(function () {
         $("#inputFileName").parent().addClass("has-error");
         return;
     }
-    if ($(".labelList li").length > 0 || $(".wysiwyg").length > 1 || $(".wysiwyg .summernote").summernote("code").trim() !== "") {
+    for (var item in editors) {
+        if(item.indexOf("use")===-1){
+            if (editors[item].getContent().trim() !== "") {
+                $("#inputFileName").val("");
+                $("#inputFileName").attr("placeholder", "请先刷新页面！！！");
+                $("#inputFileName").parent().addClass("has-error");
+                return;
+            }
+        }
+    }
+    if ($(".labelList li").length > 0 || $(".wysiwyg").length > 1) {
         $("#inputFileName").val("");
         $("#inputFileName").attr("placeholder", "请先刷新页面！！！");
         $("#inputFileName").parent().addClass("has-error");
@@ -250,98 +262,54 @@ $(".openFile").click(function () {
     $.ajax({
         type: "get",
         dataType: "json",
-        url: "/open/",
-        data: "fileName=" + fname,
-        success: function (data) {
-            if (data["title"] === "error") {
+        url: "openFile.melody",
+            data: "fileName=" + fname,
+        success: function (articleInfo) {
+            if (articleInfo["title"] === "error") {
                 alert("没找到你要的方案！");
             } else {
-                $("#inputTitle").val(data["title"]);
-                $("#inputFile").val(data["fileName"]);
+                $("#inputTitle").val(articleInfo.title);
+                $("#inputFile").val(articleInfo.fileName);
                 $("#inputFile").attr("readonly", "");
-                if (!data["fromSavePath"]) {
-                    $(".upload").remove();
-                }
-                var relKey = "";
-                for (var i = 0, len = data["contents"].length; i < len; i++) {
-                    if (i === 0) {
-                        var key = data["contents"][i]["key"];
-                        var value = data["contents"][i]["value"];
-                        if (data["contents"][i]["key"] === "untitle") {
-                            $(".richEdit > [title='untitle'] > .summernote").summernote("code", value);
-                            return;
+                var contents = articleInfo.content;
+                if (contents.length === 2 && contents[0] === "untitle") {
+                    $(".richEdit").append('<div class="wysiwyg" title="untitle"><script id="untitle" type="text/plain"></div>');
+                    editors["untitle"].setContent(contents[1]);
+                } else if (contents.length === 2 && contents[0] !== "untitle") {
+                    $(".labelList").append("<li role='presentation' class='active' title='" + contents[0]
+                        + "'><a>" + contents[0] + delTag + "</a></li>");
+                    var oldued = $(".richEdit > div")[0];
+                    $(oldued).attr("title", contents[0]);
+                    editors[contents[0]] = editors["untitle"];
+                    delete editors["untitle"];
+                    editors[contents[0]].setContent(contents[1]);
+                    $(".wysiwyg[title='" + contents[0] + "']").show();
+                } else {
+                    for (var i = 0, length = contents.length / 2, offset = 0; i < length; i++) {
+                        if (i == 0) {
+                            $(".labelList").append("<li role='presentation' class='active' title='" + contents[i]
+                                + "'><a>" + contents[i] + delTag + "</a></li>");
+                            var oldued = $(".richEdit > div")[0];
+                            $(oldued).attr("title", contents[0]);
+                            editors[contents[0]] = editors["untitle"];
+                            delete editors["untitle"];
+                            editors[contents[0]].setContent(contents[1]);
+                            $(".wysiwyg[title='" + contents[0] + "']").show();
+                            offset++;
                         } else {
-                            relKey = key.replace(/[\.]*[\\]*[\/]*/g, "");
-                            $(".labelList").append("<li role='presentation' class='active' title='" + relKey
-                                + "'><a>" + key + delTag + "</a></li>");
-                            $(".richEdit .wysiwyg").attr("title", relKey);
-                            $(".richEdit > [title='" + relKey + "'] > .summernote").summernote("code", value);
+                            $(".labelList").append("<li role='presentation' class='' title='" + contents[i + offset]
+                                + "'><a>" + contents[i + offset] + delTag + "</a></li>");
+                            $(".richEdit").append('<div class="wysiwyg" title="' + contents[i + offset]
+                                + '"><script id="' + contents[i + offset] + '" type="text/plain"></div>');
+                            var ctxt=contents[i+offset+1];
+                            UE.getEditor(contents[i+offset]).addListener("ready", function () {
+                                //在下面直接用contents[i+offset+1]会报错
+                                this.setContent(ctxt);
+                            })
+                            offset++;
                         }
-
-                    } else {
-                        var key = data["contents"][i]["key"];
-                        relKey = key.replace(/[\.]*[\\]*[\/]*/g, "");
-                        var value = data["contents"][i]["value"];
-                        $(".labelList").append("<li role='presentation' title='" + relKey
-                            + "'><a>" + key + delTag + "</a></li>");
-
-                        $(".richEdit").append('<div class="wysiwyg" title="' + relKey
-                            + '"><div class="summernote"></div></div>');
-                        $('.summernote').summernote(sumemernoteOption);
-                        $(".richEdit > [title='" + relKey + "'] > .summernote").summernote("code", value);
-                        $(".richEdit > [title='" + relKey + "']").hide();
                     }
                 }
-            }
-        }
-    });
-});
-//上传到资源服务器
-var beforeFn;//为了存储重命名文件之前的文件名
-$(".upload").click(function () {
-    console.log("上传文件");
-    if (!validateF()) {
-        return;
-    }
-    var fileName = $("#inputFile").val().trim();
-    var title = $("#inputTitle").val().trim();
-    var isOpen = $("#inputFile").attr("readonly") !== undefined ? "Y" : "N";
-    var options = {
-        keyboard: true,
-        title: "没找到你要的方案！",
-        width: 300,
-        height: 60
-    };
-    $.ajax({
-        type: "get",
-        dataType: "json",
-        url: "/upload",
-        data: "fileName=" + fileName + "&title=" + title + "&isOpen=" + isOpen + "&beforeFn=" + beforeFn,
-        success: function (data) {
-            console.log(data);
-            if (data["status"] === "success") {
-                console.log("上传成功");
-                options.title = "上传成功！"
-                var modal = $.scojs_modal(options);
-                modal.show();
-                setTimeout(closeW, 1500);
-            } else if (data["status"] === "dbExist") {
-                console.error("数据库中已存在");
-                options.title = "数据库中已存在!"
-                beforeFn = $("#inputFile").val().trim();
-                var modal = $.scojs_modal(options);
-                modal.show();
-            } else if (data["status"] === "fileExist") {
-                console.error("文件已存在");
-                options.title = "文件已存在!"
-                beforeFn = $("#inputFile").val().trim();
-                var modal = $.scojs_modal(options);
-                modal.show();
-            } else if (data["status"] === "plesave") {
-                console.error("请先保存文件");
-                options.title = "请先保存文件!"
-                var modal = $.scojs_modal(options);
-                modal.show();
             }
         }
     });

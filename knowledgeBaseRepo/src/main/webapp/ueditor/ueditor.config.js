@@ -31,7 +31,7 @@
 
         // 服务器统一请求接口路径
         //, serverUrl: URL + "jsp/controller.jsp"
-        , serverUrl:  "config.lenovo"
+        , serverUrl:  "config.melody"
 
         //工具栏上的所有的功能按钮和下拉框，可以在new编辑器的实例时选择自己需要的重新定义
         , toolbars: [[
@@ -41,8 +41,8 @@
 			'|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist', '|', 'fontfamily', 'fontsize', '|',
             'justifyleft', 'justifycenter', 'justifyright', 'justifyjustify', '|',
             'link', 'unlink', 'anchor', '|',
-            'simpleupload', 'insertimage','insertvideo', 'attachment', 'insertframe', '|',
-            'horizontal',  'spechars', 'wordimage'
+            'simpleupload', 'insertimage','insertvideo', 'attachment', 'insertframe',
+            'horizontal',  'spechars'
         ]]
         //当鼠标放在工具栏上时显示的tooltip提示,留空支持自动多语言配置，否则以配置值为准
         //,labelMap:{
@@ -356,9 +356,9 @@
 		// xss 过滤是否开启,inserthtml等操作
 		,xssFilterRules: true
 		//input xss过滤
-		,inputXssFilter: true
+		,inputXssFilter: false
 		//output xss过滤
-		,outputXssFilter: true
+		,outputXssFilter: false
 		// xss过滤白名单 名单来源: https://raw.githubusercontent.com/leizongmin/js-xss/master/lib/default.js
 		,whitList: {
 			a:      ['target', 'href', 'title', 'class', 'style'],
@@ -423,7 +423,8 @@
 			tt:     [],
 			u:      [],
 			ul:     ['class', 'style'],
-			video:  ['autoplay', 'controls', 'loop', 'preload', 'src', 'height', 'width', 'class', 'style']
+			video:  ['autoplay', 'controls', 'loop', 'preload', 'src', 'height', 'width', 'class', 'style'],
+			iframe: ['src', 'class', 'scrolling','frameborder']
 		}
     };
 

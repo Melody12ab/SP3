@@ -22,7 +22,7 @@
 
     <servlet-mapping>
         <servlet-name>knowledge</servlet-name>
-        <url-pattern>*.lenovo</url-pattern>
+        <url-pattern>*.melody</url-pattern>
     </servlet-mapping>
 
 

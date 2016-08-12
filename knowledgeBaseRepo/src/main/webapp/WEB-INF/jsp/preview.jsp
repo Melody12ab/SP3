@@ -73,10 +73,10 @@
             $(".small").append("<div class='tab-pane fade in active' id='" + content[0] + "'>" + content[++i]+ "</div>");
         }else{
             if(i==0){
-                $(".navList").append("<li class='active'><a href='#" + content[i] + "' data-toggle='tab'>" + content[i] + "</a></li>");
+                $(".navList").append("<li class='active'><a href='#" + content[i].replace("\/","\\/") + "' data-toggle='tab'>" + content[i] + "</a></li>");
                 $(".small").append("<div class='tab-pane fade in active' id='" + content[i] + "'>" + content[++i] + "</div>");
             }else{
-                $(".navList").append("<li class><a href='#" + content[i] + "' data-toggle='tab'>" + content[i] + "</a></li>");
+                $(".navList").append("<li class><a href='#" + content[i].replace("\/","\\/") + "' data-toggle='tab'>" + content[i] + "</a></li>");
                 $(".small").append("<div class='tab-pane fade ' id='" + content[i] + "'>" + content[++i] + "</div>");
             }
         }
